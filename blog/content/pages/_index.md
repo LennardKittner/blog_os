@@ -1,4 +1,0 @@
-+++
-title = "Pages"
-render = false
-+++
