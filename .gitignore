@@ -14,3 +14,7 @@ target/
 *.pdb
 
 .DS_Store
+
+# qemu installation
+qemu-8.0.0.tar.xz
+qemu-8.0.0/
