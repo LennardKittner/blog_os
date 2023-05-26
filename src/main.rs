@@ -1,12 +1,11 @@
 #![no_std]
 #![no_main]
 #![feature(custom_test_frameworks)]
-#![test_runner(test_runner)]
+#![test_runner(my_os::test_runner)]
 #![reexport_test_harness_main = "test_main"]
 
+use my_os::println;
 use core::panic::PanicInfo;
-mod vga_buffer;
-mod serial;
 
 #[no_mangle]
 pub extern "C" fn _start() -> ! {
@@ -14,15 +13,15 @@ pub extern "C" fn _start() -> ! {
 
     #[cfg(test)]
     test_main();
-   
+
     loop {}
 }
 
 /// This function is called on panic.
 #[cfg(not(test))]
 #[panic_handler]
-fn panic(_info: &PanicInfo) -> ! {
-    println!("{}", _info);
+fn panic(info: &PanicInfo) -> ! {
+    println!("{}", info);
     loop {}
 }
 
