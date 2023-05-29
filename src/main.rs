@@ -6,13 +6,13 @@
 
 use my_os::println;
 use core::panic::PanicInfo;
+use lazy_static::lazy_static;
+use x86_64::structures::idt::InterruptDescriptorTable;
 
 #[no_mangle]
 pub extern "C" fn _start() -> ! {
     println!("Hello World{}", "!");
     my_os::init();
-
-    x86_64::instructions::interrupts::int3();
 
     #[cfg(test)]
     test_main();
