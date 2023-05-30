@@ -23,7 +23,7 @@ pub fn init_test_idt() {
     TEST_IDT.load();
 }
 
-extern "x86-interrupt" fn test_double_fault_handler(stack_frame: InterruptStackFrame, _error_code: u64) -> ! {
+extern "x86-interrupt" fn test_double_fault_handler(_stack_frame: InterruptStackFrame, _error_code: u64) -> ! {
     serial_println!("{}", Green("[ok]"));
     exit_qemu(my_os::QemuExitCode::Success);
     loop {}

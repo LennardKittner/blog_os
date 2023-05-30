@@ -6,8 +6,6 @@
 
 use my_os::println;
 use core::panic::PanicInfo;
-use lazy_static::lazy_static;
-use x86_64::structures::idt::InterruptDescriptorTable;
 
 #[no_mangle]
 pub extern "C" fn _start() -> ! {
@@ -17,7 +15,7 @@ pub extern "C" fn _start() -> ! {
     #[cfg(test)]
     test_main();
     println!("It did not crash!");
-    loop {}
+    my_os::hlt_loop();
 }
 
 /// This function is called on panic.
@@ -25,7 +23,7 @@ pub extern "C" fn _start() -> ! {
 #[panic_handler]
 fn panic(info: &PanicInfo) -> ! {
     println!("{}", info);
-    loop {}
+    my_os::hlt_loop();
 }
 
 #[cfg(test)]
