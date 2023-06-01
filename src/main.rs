@@ -4,18 +4,16 @@
 #![test_runner(my_os::test_runner)]
 #![reexport_test_harness_main = "test_main"]
 
-use my_os::println;
+use bootloader::{BootInfo, entry_point};
+use my_os::{println};
 use core::panic::PanicInfo;
 
-#[no_mangle]
-pub extern "C" fn _start() -> ! {
+entry_point!(kernel_main);
+
+fn kernel_main(boot_info: &'static BootInfo) -> ! {
     println!("Hello World{}", "!");
     my_os::init();
-    
-    use x86_64::registers::control::Cr3;
-    let (level_4_page_table, _) = Cr3::read();
-    println!("Level 4 page table at: {:?}", level_4_page_table.start_address());
-
+  
     #[cfg(test)]
     test_main();
     println!("It did not crash!");
