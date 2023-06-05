@@ -101,7 +101,7 @@ unsafe impl FrameAllocator<Size4KiB> for BootInfoFrameAllocator {
     }
 }
 
- /// Returns an iterator over the usable frames specified in the memory map.
+/// Returns an iterator over the usable frames specified in the memory map.
 fn usable_frames(memory_map: &'static MemoryMap) -> impl Iterator<Item = PhysFrame> {
     // get usable regions from memory map
     let regions = memory_map.iter();

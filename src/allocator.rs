@@ -1,22 +1,38 @@
-use core::{alloc::GlobalAlloc, ptr::null_mut};
 use x86_64::{structures::paging::{Size4KiB, FrameAllocator, mapper::MapToError, Page, PageTableFlags, Mapper}, VirtAddr};
-use linked_list_allocator::LockedHeap;
+
+use self::fixed_size_block::FixedSizeBlockAllocator;
+
+pub mod bump;
+pub mod dummy;
+pub mod linked_list;
+pub mod fixed_size_block;
 
 #[global_allocator]
-static ALLOCATOR: LockedHeap = LockedHeap::empty();
+static ALLOCATOR: Locked<FixedSizeBlockAllocator> = Locked::new(FixedSizeBlockAllocator::new());
 
 pub const HEAP_START: usize = 0x_4444_4444_0000;
 pub const HEAP_SIZE: usize = 100 * 1024;
-pub struct Dummy;
 
-unsafe impl GlobalAlloc for Dummy {
-    unsafe fn alloc(&self, _layout: core::alloc::Layout) -> *mut u8 {
-        null_mut()
+/// A wrapper around spin::Mutex to permit trait implementations.
+pub struct Locked<A> {
+    inner: spin::Mutex<A>,
+}
+
+impl<A> Locked<A> {
+    pub const fn new(inner: A) -> Self {
+        Locked { inner: spin::Mutex::new(inner) }
     }
 
-    unsafe fn dealloc(&self, _ptr: *mut u8, _layout: core::alloc::Layout) {
-        panic!("dealloc should never be called");
+    pub fn lock(&self) -> spin::MutexGuard<A> {
+        self.inner.lock()
     }
+}
+
+/// Align the given address `addr` upwards to alignment `align`.
+///
+/// Requires that `align` is a power of two.
+fn align_up(addr: usize, align: usize) -> usize {
+    (addr + align - 1) & !(align - 1)
 }
 
 pub fn init_heap(mapper: &mut impl Mapper<Size4KiB>, frame_allocator: &mut impl FrameAllocator<Size4KiB>) -> Result<(), MapToError<Size4KiB>> {

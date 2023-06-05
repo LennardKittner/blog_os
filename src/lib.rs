@@ -5,7 +5,7 @@
 #![reexport_test_harness_main = "test_main"]
 #![feature(abi_x86_interrupt)]
 #![feature(type_alias_impl_trait)]
-
+#![feature(const_mut_refs)]
 
 use core::panic::PanicInfo;
 extern crate alloc;
