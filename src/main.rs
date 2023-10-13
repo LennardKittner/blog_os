@@ -5,14 +5,24 @@
 #![reexport_test_harness_main = "test_main"]
 
 use bootloader::{BootInfo, entry_point};
-use my_os::{println};
+use my_os::{println, task::{Task, keyboard, executor::Executor}};
 use core::panic::PanicInfo;
 
 extern crate alloc;
 use alloc::{boxed::Box, vec, vec::Vec, rc::Rc};
 
-entry_point!(kernel_main);
 
+async fn async_number() -> u32 {
+    42
+}
+
+async fn example_task() {
+    let number = async_number().await;
+    println!("async number: {}", number);
+}
+
+
+entry_point!(kernel_main);
 fn kernel_main(boot_info: &'static BootInfo) -> ! {
     use my_os::allocator;
     use my_os::memory::{self, BootInfoFrameAllocator};
@@ -46,10 +56,13 @@ fn kernel_main(boot_info: &'static BootInfo) -> ! {
     println!("reference count is {} now", Rc::strong_count(&cloned_reference));
 
 
+    let mut executor = Executor::new();
+    executor.spawn(Task::new(example_task()));
+    executor.spawn(Task::new(keyboard::print_key_presses()));
+    executor.run();
+
     #[cfg(test)]
     test_main();
-    println!("It did not crash!");
-    my_os::hlt_loop();
 }
 
 /// This function is called on panic.
